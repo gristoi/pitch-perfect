@@ -14,7 +14,7 @@ class PlaySoundsViewController: UIViewController {
     var receivedAudio: RecordedAudio!
     var audioEngine: AVAudioEngine!
     var audioFile: AVAudioFile!
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         audioPlayer = AVAudioPlayer(contentsOfURL: receivedAudio.filePathUrl, error: nil)
@@ -36,6 +36,38 @@ class PlaySoundsViewController: UIViewController {
         playAudioWithVariablePitch(-1000)
     }
     
+    
+    @IBAction func playEchoAudio(sender: UIButton) {
+        
+        resetAudio()
+        var echoNode = AVAudioUnitDelay()
+        echoNode.delayTime = NSTimeInterval(0.4)
+        playAudioEffect(echoNode)
+    }
+    
+    @IBAction func playReverbAudio(sender: UIButton) {
+        
+        resetAudio()
+        var reverbNode = AVAudioUnitReverb()
+        reverbNode.loadFactoryPreset( AVAudioUnitReverbPreset.LargeHall)
+        reverbNode.wetDryMix = 50
+        playAudioEffect(reverbNode)
+    }
+    
+    // helper function to handle audio effects ( echo and reverb ) 
+    func playAudioEffect(effect: AVAudioUnitEffect) {
+        
+        var audioPlayerNode = AVAudioPlayerNode()
+        audioEngine.attachNode(audioPlayerNode)
+        audioEngine.attachNode(effect)
+        audioEngine.connect(audioPlayerNode, to: effect, format: nil)
+        audioEngine.connect(effect, to: audioEngine.outputNode, format: nil)
+        audioPlayerNode.scheduleFile(audioFile, atTime: nil, completionHandler:nil)
+        audioEngine.startAndReturnError(nil)
+        audioPlayerNode.play()
+    }
+    
+    // helper function to handle pitch based effects
     func playAudioWithVariablePitch(pitch: Float){
         
         resetAudio()
@@ -56,6 +88,11 @@ class PlaySoundsViewController: UIViewController {
         audioPlayerNode.play()
         
     }
+    
+    @IBAction func stopPlayback(sender: AnyObject) {
+        resetAudio()
+    }
+    
     @IBAction func playSlowAudio(sender: UIButton) {
         resetAudio()
         playAudioBySpeed(0.5)
@@ -66,9 +103,6 @@ class PlaySoundsViewController: UIViewController {
         playAudioBySpeed(1.5)
     }
     
-    @IBAction func stopBtn(sender: UIButton) {
-        audioPlayer.stop()
-    }
     
     func playAudioBySpeed(speed: Float) {
         audioPlayer.stop()

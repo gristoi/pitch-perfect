@@ -15,6 +15,8 @@ class RecordSoundsViewController: UIViewController {
     @IBOutlet weak var recordingInProgress: UILabel!
     @IBOutlet weak var stopButton: UIButton!
     @IBOutlet weak var recordButton: UIButton!
+    @IBOutlet weak var pauseButton: UIButton!
+    @IBOutlet weak var resumeButton: UIButton!
     
     var audioRecorder : AVAudioRecorder!
     var recordedAudio : RecordedAudio!
@@ -39,13 +41,23 @@ class RecordSoundsViewController: UIViewController {
         
         recordButton.enabled = false;
         stopButton.hidden = false;
-        recordingInProgress.text = "Recording";
+        
+        //have hidden the buttons using storyboard by default
+        resumeButton.hidden = false
+        pauseButton.hidden = false;
+        
+        recordingInProgress.text = "Recording...";
         let dirPath = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)[0] as! String
         
+        
+        // using the same file to write over to save space
         let recordingName = "my_audio.wav"
         let pathArray = [dirPath, recordingName]
         let filePath = NSURL.fileURLWithPathComponents(pathArray)
         
+        
+        //bug found on iphone 6 plus 
+        //src: https://discussions.udacity.com/t/extremely-low-volume-when-playing-the-recording-on-my-iphone-6-plus/22061
         var session = AVAudioSession.sharedInstance()
         session.setCategory(AVAudioSessionCategoryPlayAndRecord, error: nil)
         
@@ -77,9 +89,27 @@ class RecordSoundsViewController: UIViewController {
     }
     
 
+    @IBAction func resumeAudio(sender: UIButton) {
+        
+        recordingInProgress.text = "Recording..."
+        resumeButton.enabled = false;
+        pauseButton.enabled = true
+        audioRecorder.record();
+    }
+    
+    
+    @IBAction func pauseAudio(sender: UIButton) {
+        
+        recordingInProgress.text = "Paused"
+        resumeButton.enabled = true;
+        pauseButton.enabled = false
+        audioRecorder.pause();
+    }
+    
 }
 
 //MARK : -AVAudioRecorderDelegate
+//moving delegate into extension as to not polute the main class, easier to read
 extension RecordSoundsViewController : AVAudioRecorderDelegate {
     
     func audioRecorderDidFinishRecording(recorder: AVAudioRecorder!, successfully flag: Bool) {
