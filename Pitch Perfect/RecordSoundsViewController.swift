@@ -28,7 +28,11 @@ class RecordSoundsViewController: UIViewController {
     
     override func viewWillAppear(animated: Bool) {
         stopButton.hidden = true;
-        recordButton.enabled = true;
+        recordButton.enabled = true
+        resumeButton.hidden = true
+        pauseButton.hidden = true
+        pauseButton.enabled = true
+        resumeButton.enabled = false
     }
 
     override func didReceiveMemoryWarning() {
@@ -118,6 +122,7 @@ extension RecordSoundsViewController : AVAudioRecorderDelegate {
             var session = AVAudioSession.sharedInstance()
             session.setCategory(AVAudioSessionCategoryPlayback, error: nil)
             recordedAudio = RecordedAudio(filePathUrl: recorder.url, title: recorder.url.lastPathComponent!)
+            //have hidden the buttons using storyboard by default
             self.performSegueWithIdentifier("stopRecording", sender: recordedAudio)
         }
     }
